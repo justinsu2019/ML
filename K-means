@@ -1,0 +1,92 @@
+#version 1
+#done:
+#1 can load files -- file format is "name,data(can be data1,data2,data3, it will do sum after read out)"
+#2 can load elements and put them into a set or array for later usage
+#target.shape can show you how many data there is in target
+#target_names can show you what's the name of the column
+# clustering : k-means done!
+
+#4 sort output
+
+#need to do:
+#2 after giving a initial data, can predict what it will be after a set time
+#3 can re-set after a new real data inputed
+
+#3 can tell which elements effect the most for the goal
+
+#all about K-means, check here: https://www.cnblogs.com/wuchuanying/p/6218486.html
+
+
+
+#使用K-Means算法聚类消费行为特征数据
+
+import pandas as pd
+
+#参数初始化
+
+inputfile = 'G:/Coding mind/Machine learning/new.xlsx' #销量及其他属性数据
+
+outputfile = 'G:/Coding mind/Machine learning/new'+' copy.xlsx' #保存结果的文件名
+
+k = 4 #聚类的类别
+
+iteration = 100 #聚类最大循环次数
+
+data = pd.read_excel(inputfile, index_col = 'Id') #读取数据
+
+#data_zs = 1.0*(data - data.mean())/data.std() #数据标准化
+
+from sklearn.cluster import KMeans
+
+model = KMeans(n_clusters = k, n_jobs = 4, max_iter = iteration) #分为k类, 并发数4
+
+#model.fit(data_zs) #开始聚类
+model.fit(data) #开始聚类
+
+#简单打印结果
+
+r1 = pd.Series(model.labels_).value_counts() #统计各个类别的数目
+
+r2 = pd.DataFrame(model.cluster_centers_) #找出聚类中心
+
+r = pd.concat([r2, r1], axis = 1) #横向连接(0是纵向), 得到聚类中心对应的类别下的数目
+
+r.columns = list(data.columns) + [u'类别数目'] #重命名表头
+
+print(r.sort_values(by = 'SUM')) 
+
+#详细输出原始数据及其类别
+
+r = pd.concat([data, pd.Series(model.labels_, index = data.index)], axis = 1) #详细输出每个样本对应的类别
+
+r.columns = list(data.columns) + [u'聚类类别']  #重命名表头 + [u'average']
+
+r.sort_values(by = 'SUM').to_excel(outputfile)   ###Sort and then output
+
+#r.to_excel(outputfile)
+
+
+#一维数据可视化 暂未解开
+# learn dataframe
+# 
+
+#import matplotlib.pyplot as plt
+#import os
+#import numpy
+#import seaborn as sns
+#x = r1
+#y = r2
+#plt.plot(x,y)
+#plt.show()
+
+#
+
+#sns.boxplot(x='Id', y='SUM', data=data)
+
+#sns.plt.show()
+
+
+
+
+# need to learn: GAN -- http://www.360doc.com/content/16/1208/23/16534268_613150096.shtml
+# which element effect the most in all.
