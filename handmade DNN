@@ -1,0 +1,648 @@
+# learn optimization
+# set alert box when program finished.
+
+import math
+import random
+import numpy as np
+import excelExecuterV1 as ee
+from sklearn.model_selection import train_test_split #数据集分割
+import easygui as eg
+
+ 
+
+random.seed()
+
+def rand(a, b):
+    return (b - a) * random.random() + a
+
+ 
+def make_matrix(m, n, fill=0.0):
+    mat = []
+    for i in range(m):
+        mat.append([fill] * n)
+    return mat
+
+ 
+
+def sigmoid(x):
+    return 1.0 / (1.0 + math.exp(-x))
+
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+ 
+
+class BPNeuralNetwork:
+    def __init__(self):
+        self.input_n = 0
+        self.hidden_n = 0
+        self.output_n = 0
+        self.input_cells = []
+        self.hidden_cells = []
+        self.output_cells = []
+        self.input_weights = []
+        self.output_weights = []
+        self.input_correction = []
+        self.output_correction = []
+
+
+    def preWeightSetting(self):
+
+
+        self.output_weights[0][0]=0.339
+        self.output_weights[0][1]=-4.03
+        self.output_weights[0][2]=0.133
+        self.output_weights[1][0]=0.360
+        self.output_weights[1][1]=3.252
+        self.output_weights[1][2]=-2.09
+        self.output_weights[2][0]=-3.72
+        self.output_weights[2][1]=-7.57
+        self.output_weights[2][2]=-2.92
+        self.output_weights[3][0]=1.812
+        self.output_weights[3][1]=-3.79
+        self.output_weights[3][2]=-0.08
+        self.output_weights[4][0]=-4.37
+        self.output_weights[4][1]=1.618
+        self.output_weights[4][2]=3.704
+        self.output_weights[5][0]=1.734
+        self.output_weights[5][1]=-1.13
+        self.output_weights[5][2]=-1.00
+        self.output_weights[6][0]=8.525
+        self.output_weights[6][1]=-10.6
+        self.output_weights[6][2]=-9.79
+        self.output_weights[7][0]=0.582
+        self.output_weights[7][1]=-5.58
+        self.output_weights[7][2]=1.673
+        self.output_weights[8][0]=-3.89
+        self.output_weights[8][1]=-10.3
+        self.output_weights[8][2]=7.057
+        self.output_weights[9][0]=-3.67
+        self.output_weights[9][1]=-7.38
+        self.output_weights[9][2]=-2.70
+        self.output_weights[10][0]=-1.06
+        self.output_weights[10][1]=-0.94
+        self.output_weights[10][2]=1.105
+        self.output_weights[11][0]=-3.20
+        self.output_weights[11][1]=-10.9
+        self.output_weights[11][2]=6.164
+        self.output_weights[12][0]=-5.71
+        self.output_weights[12][1]=1.469
+        self.output_weights[12][2]=3.390
+        self.output_weights[13][0]=-5.34
+        self.output_weights[13][1]=6.417
+        self.output_weights[13][2]=3.950
+        self.output_weights[14][0]=13.43
+        self.output_weights[14][1]=-9.37
+        self.output_weights[14][2]=-10.3
+        self.output_weights[15][0]=3.713
+        self.output_weights[15][1]=-0.26
+        self.output_weights[15][2]=-3.96
+        self.output_weights[16][0]=-2.59
+        self.output_weights[16][1]=0.669
+        self.output_weights[16][2]=2.006
+        self.output_weights[17][0]=-3.42
+        self.output_weights[17][1]=0.193
+        self.output_weights[17][2]=3.246
+        self.output_weights[18][0]=6.893
+        self.output_weights[18][1]=-0.33
+        self.output_weights[18][2]=-12.0
+        self.output_weights[19][0]=13.16
+        self.output_weights[19][1]=-1.09
+        self.output_weights[19][2]=-16.5
+        self.output_weights[20][0]=-10.8
+        self.output_weights[20][1]=-6.45
+        self.output_weights[20][2]=14.36
+        self.output_weights[21][0]=-0.00
+        self.output_weights[21][1]=5.391
+        self.output_weights[21][2]=-6.28
+        self.output_weights[22][0]=3.497
+        self.output_weights[22][1]=-1.60
+        self.output_weights[22][2]=-3.47
+        self.output_weights[23][0]=-10.8
+        self.output_weights[23][1]=-8.68
+        self.output_weights[23][2]=9.248
+        self.output_weights[24][0]=-8.83
+        self.output_weights[24][1]=1.300
+        self.output_weights[24][2]=9.021
+        self.output_weights[25][0]=0.388
+        self.output_weights[25][1]=-12.0
+        self.output_weights[25][2]=0.535
+        self.output_weights[26][0]=3.897
+        self.output_weights[26][1]=-1.17
+        self.output_weights[26][2]=-4.21
+        self.output_weights[27][0]=8.960
+        self.output_weights[27][1]=-9.03
+        self.output_weights[27][2]=-2.88
+        self.output_weights[28][0]=-6.58
+        self.output_weights[28][1]=-1.37
+        self.output_weights[28][2]=5.377
+        self.output_weights[29][0]=1.947
+        self.output_weights[29][1]=-1.21
+        self.output_weights[29][2]=-1.38
+        self.input_weights[0][0]=-1.89
+        self.input_weights[0][1]=0.310
+        self.input_weights[0][2]=-0.03
+        self.input_weights[0][3]=2.037
+        self.input_weights[0][4]=4.398
+        self.input_weights[0][5]=-0.79
+        self.input_weights[0][6]=-13.2
+        self.input_weights[0][7]=1.438
+        self.input_weights[0][8]=-2.17
+        self.input_weights[0][9]=0.251
+        self.input_weights[0][10]=-12.2
+        self.input_weights[0][11]=-1.29
+        self.input_weights[0][12]=5.215
+        self.input_weights[0][13]=-9.77
+        self.input_weights[0][14]=0.731
+        self.input_weights[0][15]=-3.20
+        self.input_weights[0][16]=11.44
+        self.input_weights[0][17]=-8.86
+        self.input_weights[0][18]=4.508
+        self.input_weights[0][19]=-1.88
+        self.input_weights[0][20]=11.97
+        self.input_weights[0][21]=16.09
+        self.input_weights[0][22]=-19.3
+        self.input_weights[0][23]=-9.26
+        self.input_weights[0][24]=-0.17
+        self.input_weights[0][25]=-8.28
+        self.input_weights[0][26]=-8.43
+        self.input_weights[0][27]=-1.28
+        self.input_weights[0][28]=5.265
+        self.input_weights[0][29]=1.554
+        self.input_weights[1][0]=0.699
+        self.input_weights[1][1]=2.908
+        self.input_weights[1][2]=-0.30
+        self.input_weights[1][3]=-0.83
+        self.input_weights[1][4]=-6.16
+        self.input_weights[1][5]=-8.13
+        self.input_weights[1][6]=-0.05
+        self.input_weights[1][7]=1.072
+        self.input_weights[1][8]=5.365
+        self.input_weights[1][9]=0.042
+        self.input_weights[1][10]=7.284
+        self.input_weights[1][11]=-10.4
+        self.input_weights[1][12]=2.514
+        self.input_weights[1][13]=3.934
+        self.input_weights[1][14]=5.580
+        self.input_weights[1][15]=-23.8
+        self.input_weights[1][16]=4.621
+        self.input_weights[1][17]=-20.9
+        self.input_weights[1][18]=3.036
+        self.input_weights[1][19]=-19.4
+        self.input_weights[1][20]=-18.6
+        self.input_weights[1][21]=2.423
+        self.input_weights[1][22]=0.671
+        self.input_weights[1][23]=10.87
+        self.input_weights[1][24]=-0.85
+        self.input_weights[1][25]=14.93
+        self.input_weights[1][26]=5.500
+        self.input_weights[1][27]=1.198
+        self.input_weights[1][28]=9.762
+        self.input_weights[1][29]=2.529
+        self.input_weights[2][0]=3.296
+        self.input_weights[2][1]=-6.75
+        self.input_weights[2][2]=0.050
+        self.input_weights[2][3]=-2.18
+        self.input_weights[2][4]=1.231
+        self.input_weights[2][5]=5.858
+        self.input_weights[2][6]=2.257
+        self.input_weights[2][7]=-4.22
+        self.input_weights[2][8]=-1.82
+        self.input_weights[2][9]=-0.13
+        self.input_weights[2][10]=10.13
+        self.input_weights[2][11]=4.306
+        self.input_weights[2][12]=-7.74
+        self.input_weights[2][13]=6.128
+        self.input_weights[2][14]=-8.37
+        self.input_weights[2][15]=13.42
+        self.input_weights[2][16]=11.44
+        self.input_weights[2][17]=21.73
+        self.input_weights[2][18]=-12.4
+        self.input_weights[2][19]=8.792
+        self.input_weights[2][20]=0.422
+        self.input_weights[2][21]=-13.2
+        self.input_weights[2][22]=8.085
+        self.input_weights[2][23]=4.964
+        self.input_weights[2][24]=-1.95
+        self.input_weights[2][25]=2.752
+        self.input_weights[2][26]=9.649
+        self.input_weights[2][27]=0.462
+        self.input_weights[2][28]=-6.69
+        self.input_weights[2][29]=8.509
+        self.input_weights[3][0]=7.681
+        self.input_weights[3][1]=1.058
+        self.input_weights[3][2]=2.505
+        self.input_weights[3][3]=-1.90
+        self.input_weights[3][4]=-10.4
+        self.input_weights[3][5]=7.475
+        self.input_weights[3][6]=-16.2
+        self.input_weights[3][7]=-2.16
+        self.input_weights[3][8]=-3.19
+        self.input_weights[3][9]=-1.21
+        self.input_weights[3][10]=-4.09
+        self.input_weights[3][11]=-2.04
+        self.input_weights[3][12]=-11.7
+        self.input_weights[3][13]=-4.71
+        self.input_weights[3][14]=-12.1
+        self.input_weights[3][15]=-9.05
+        self.input_weights[3][16]=-11.4
+        self.input_weights[3][17]=3.165
+        self.input_weights[3][18]=-19.2
+        self.input_weights[3][19]=4.875
+        self.input_weights[3][20]=-28.9
+        self.input_weights[3][21]=-2.52
+        self.input_weights[3][22]=-20.4
+        self.input_weights[3][23]=1.327
+        self.input_weights[3][24]=1.878
+        self.input_weights[3][25]=13.87
+        self.input_weights[3][26]=-5.39
+        self.input_weights[3][27]=11.48
+        self.input_weights[3][28]=11.44
+        self.input_weights[3][29]=-5.37
+        self.input_weights[4][0]=5.306
+        self.input_weights[4][1]=1.840
+        self.input_weights[4][2]=-2.49
+        self.input_weights[4][3]=3.469
+        self.input_weights[4][4]=-11.3
+        self.input_weights[4][5]=-5.38
+        self.input_weights[4][6]=24.13
+        self.input_weights[4][7]=-1.31
+        self.input_weights[4][8]=-24.0
+        self.input_weights[4][9]=1.161
+        self.input_weights[4][10]=-20.9
+        self.input_weights[4][11]=-7.71
+        self.input_weights[4][12]=-6.47
+        self.input_weights[4][13]=-14.1
+        self.input_weights[4][14]=-6.69
+        self.input_weights[4][15]=6.861
+        self.input_weights[4][16]=-15.1
+        self.input_weights[4][17]=1.889
+        self.input_weights[4][18]=0.053
+        self.input_weights[4][19]=5.029
+        self.input_weights[4][20]=-9.28
+        self.input_weights[4][21]=-0.58
+        self.input_weights[4][22]=0.860
+        self.input_weights[4][23]=4.167
+        self.input_weights[4][24]=22.53
+        self.input_weights[4][25]=-7.94
+        self.input_weights[4][26]=-0.53
+        self.input_weights[4][27]=0.535
+        self.input_weights[4][28]=-4.11
+        self.input_weights[4][29]=1.049
+        self.input_weights[5][0]=-3.98
+        self.input_weights[5][1]=-3.22
+        self.input_weights[5][2]=0.541
+        self.input_weights[5][3]=-6.01
+        self.input_weights[5][4]=-15.0
+        self.input_weights[5][5]=14.47
+        self.input_weights[5][6]=-9.47
+        self.input_weights[5][7]=-5.93
+        self.input_weights[5][8]=14.26
+        self.input_weights[5][9]=-0.62
+        self.input_weights[5][10]=8.614
+        self.input_weights[5][11]=1.591
+        self.input_weights[5][12]=-23.5
+        self.input_weights[5][13]=4.900
+        self.input_weights[5][14]=-1.54
+        self.input_weights[5][15]=1.170
+        self.input_weights[5][16]=-11.4
+        self.input_weights[5][17]=-11.2
+        self.input_weights[5][18]=5.015
+        self.input_weights[5][19]=-17.9
+        self.input_weights[5][20]=19.19
+        self.input_weights[5][21]=-18.4
+        self.input_weights[5][22]=-2.51
+        self.input_weights[5][23]=-16.8
+        self.input_weights[5][24]=-11.4
+        self.input_weights[5][25]=-7.21
+        self.input_weights[5][26]=-11.5
+        self.input_weights[5][27]=-18.6
+        self.input_weights[5][28]=8.292
+        self.input_weights[5][29]=-6.88
+        self.input_weights[6][0]=1.940
+        self.input_weights[6][1]=-4.96
+        self.input_weights[6][2]=-1.14
+        self.input_weights[6][3]=-2.00
+        self.input_weights[6][4]=-2.37
+        self.input_weights[6][5]=10.36
+        self.input_weights[6][6]=-16.5
+        self.input_weights[6][7]=-6.46
+        self.input_weights[6][8]=4.940
+        self.input_weights[6][9]=1.244
+        self.input_weights[6][10]=11.38
+        self.input_weights[6][11]=2.850
+        self.input_weights[6][12]=3.849
+        self.input_weights[6][13]=-16.3
+        self.input_weights[6][14]=-6.38
+        self.input_weights[6][15]=11.81
+        self.input_weights[6][16]=-11.8
+        self.input_weights[6][17]=-5.13
+        self.input_weights[6][18]=4.588
+        self.input_weights[6][19]=-28.5
+        self.input_weights[6][20]=14.85
+        self.input_weights[6][21]=-28.0
+        self.input_weights[6][22]=5.453
+        self.input_weights[6][23]=-20.4
+        self.input_weights[6][24]=-17.0
+        self.input_weights[6][25]=-7.11
+        self.input_weights[6][26]=-4.07
+        self.input_weights[6][27]=-16.2
+        self.input_weights[6][28]=1.316
+        self.input_weights[6][29]=4.967
+        self.input_weights[7][0]=-1.64
+        self.input_weights[7][1]=-11.8
+        self.input_weights[7][2]=1.953
+        self.input_weights[7][3]=-5.39
+        self.input_weights[7][4]=0.002
+        self.input_weights[7][5]=8.932
+        self.input_weights[7][6]=10.53
+        self.input_weights[7][7]=9.656
+        self.input_weights[7][8]=16.02
+        self.input_weights[7][9]=-1.34
+        self.input_weights[7][10]=-15.5
+        self.input_weights[7][11]=-1.46
+        self.input_weights[7][12]=-3.10
+        self.input_weights[7][13]=22.39
+        self.input_weights[7][14]=-34.1
+        self.input_weights[7][15]=-22.1
+        self.input_weights[7][16]=-25.6
+        self.input_weights[7][17]=-3.31
+        self.input_weights[7][18]=3.355
+        self.input_weights[7][19]=13.14
+        self.input_weights[7][20]=-4.44
+        self.input_weights[7][21]=-7.86
+        self.input_weights[7][22]=7.926
+        self.input_weights[7][23]=2.541
+        self.input_weights[7][24]=6.581
+        self.input_weights[7][25]=17.22
+        self.input_weights[7][26]=-2.11
+        self.input_weights[7][27]=-4.51
+        self.input_weights[7][28]=5.973
+        self.input_weights[7][29]=5.582
+        self.input_weights[8][0]=4.235
+        self.input_weights[8][1]=11.65
+        self.input_weights[8][2]=0.650
+        self.input_weights[8][3]=-0.23
+        self.input_weights[8][4]=-6.50
+        self.input_weights[8][5]=6.028
+        self.input_weights[8][6]=-10.7
+        self.input_weights[8][7]=0.952
+        self.input_weights[8][8]=-5.60
+        self.input_weights[8][9]=-0.58
+        self.input_weights[8][10]=19.13
+        self.input_weights[8][11]=-17.3
+        self.input_weights[8][12]=7.466
+        self.input_weights[8][13]=-24.8
+        self.input_weights[8][14]=24.18
+        self.input_weights[8][15]=-3.32
+        self.input_weights[8][16]=-25.0
+        self.input_weights[8][17]=-18.1
+        self.input_weights[8][18]=-22.7
+        self.input_weights[8][19]=-25.4
+        self.input_weights[8][20]=-13.3
+        self.input_weights[8][21]=0.783
+        self.input_weights[8][22]=-25.8
+        self.input_weights[8][23]=14.17
+        self.input_weights[8][24]=-7.51
+        self.input_weights[8][25]=-9.32
+        self.input_weights[8][26]=-4.05
+        self.input_weights[8][27]=19.13
+        self.input_weights[8][28]=-12.0
+        self.input_weights[8][29]=-12.5
+        self.input_weights[9][0]=-7.11
+        self.input_weights[9][1]=5.428
+        self.input_weights[9][2]=-1.42
+        self.input_weights[9][3]=2.469
+        self.input_weights[9][4]=-25.5
+        self.input_weights[9][5]=-6.00
+        self.input_weights[9][6]=17.38
+        self.input_weights[9][7]=6.664
+        self.input_weights[9][8]=-0.21
+        self.input_weights[9][9]=1.521
+        self.input_weights[9][10]=13.85
+        self.input_weights[9][11]=4.367
+        self.input_weights[9][12]=10.93
+        self.input_weights[9][13]=-4.01
+        self.input_weights[9][14]=-1.56
+        self.input_weights[9][15]=-5.95
+        self.input_weights[9][16]=-12.8
+        self.input_weights[9][17]=1.824
+        self.input_weights[9][18]=17.10
+        self.input_weights[9][19]=-4.52
+        self.input_weights[9][20]=0.442
+        self.input_weights[9][21]=16.92
+        self.input_weights[9][22]=5.154
+        self.input_weights[9][23]=-15.4
+        self.input_weights[9][24]=13.36
+        self.input_weights[9][25]=-6.43
+        self.input_weights[9][26]=-6.42
+        self.input_weights[9][27]=-6.32
+        self.input_weights[9][28]=-15.0
+        self.input_weights[9][29]=-39.2
+        self.input_weights[10][0]=-11.1
+        self.input_weights[10][1]=-4.56
+        self.input_weights[10][2]=-2.64
+        self.input_weights[10][3]=2.728
+        self.input_weights[10][4]=16.66
+        self.input_weights[10][5]=-29.9
+        self.input_weights[10][6]=-7.74
+        self.input_weights[10][7]=-5.38
+        self.input_weights[10][8]=-16.9
+        self.input_weights[10][9]=-2.71
+        self.input_weights[10][10]=-28.4
+        self.input_weights[10][11]=-0.05
+        self.input_weights[10][12]=0.958
+        self.input_weights[10][13]=2.764
+        self.input_weights[10][14]=5.877
+        self.input_weights[10][15]=-6.63
+        self.input_weights[10][16]=-5.22
+        self.input_weights[10][17]=-2.38
+        self.input_weights[10][18]=-8.97
+        self.input_weights[10][19]=5.580
+        self.input_weights[10][20]=-16.7
+        self.input_weights[10][21]=-2.66
+        self.input_weights[10][22]=2.265
+        self.input_weights[10][23]=-8.55
+        self.input_weights[10][24]=-11.1
+        self.input_weights[10][25]=-16.7
+        self.input_weights[10][26]=-3.96
+        self.input_weights[10][27]=-3.56
+        self.input_weights[10][28]=-25.8
+        self.input_weights[10][29]=-11.1
+
+       
+
+                   
+
+    def setup(self, ni, nh, no):
+
+        self.input_n = ni + 1
+        self.hidden_n = nh
+        self.output_n = no
+        
+        # init cells
+
+        self.input_cells = [1.0] * self.input_n
+        self.hidden_cells = [1.0] * self.hidden_n
+        self.output_cells = [1.0] * self.output_n
+
+        # init weights
+
+        self.input_weights = make_matrix(self.input_n, self.hidden_n)
+        self.output_weights = make_matrix(self.hidden_n, self.output_n)
+
+
+        # random activate
+        """
+        for i in range(self.input_n):
+            for h in range(self.hidden_n):
+                self.input_weights[i][h] = rand(-0.2, 0.2)
+        for h in range(self.hidden_n):
+            for o in range(self.output_n):
+                self.output_weights[h][o] = rand(-2.0, 2.0)
+        """
+        # init correction matrix
+
+
+        self.preWeightSetting()  #input spre-saved weight data
+        self.input_correction = make_matrix(self.input_n, self.hidden_n)
+        self.output_correction = make_matrix(self.hidden_n, self.output_n)
+
+ 
+
+    def predict(self, inputs):
+
+        # activate input layer
+
+        for i in range(self.input_n - 1):
+            self.input_cells[i] = inputs[i]
+
+        # activate hidden layer
+
+        for j in range(self.hidden_n):
+            total = 0.0
+            for i in range(self.input_n):
+                total += self.input_cells[i] * self.input_weights[i][j]
+            self.hidden_cells[j] = sigmoid(total)
+
+        # activate output layer
+
+        for k in range(self.output_n):
+            total = 0.0
+            for j in range(self.hidden_n):
+                total += self.hidden_cells[j] * self.output_weights[j][k]
+            self.output_cells[k] = sigmoid(total)
+        return self.output_cells[:]   #this returns the precentage
+
+ 
+
+    def back_propagate(self, case, label, learn, correct):
+
+        # feed forward
+        self.predict(case)
+
+        # get output layer error
+        output_deltas = [0.0] * self.output_n
+
+        for o in range(self.output_n):
+            error = label[o] - self.output_cells[o]
+            output_deltas[o] = sigmoid_derivative(self.output_cells[o]) * error
+
+        # get hidden layer error
+        hidden_deltas = [0.0] * self.hidden_n
+
+        for h in range(self.hidden_n):
+            error = 0.0
+
+            for o in range(self.output_n):
+                error += output_deltas[o] * self.output_weights[h][o]
+            hidden_deltas[h] = sigmoid_derivative(self.hidden_cells[h]) * error
+
+        # update output weights
+
+        for h in range(self.hidden_n):
+            for o in range(self.output_n):
+                change = output_deltas[o] * self.hidden_cells[h]
+                self.output_weights[h][o] += learn * change + correct * self.output_correction[h][o]
+                self.output_correction[h][o] = change
+
+        # update input weights
+
+        for i in range(self.input_n):
+            for h in range(self.hidden_n):
+                change = hidden_deltas[h] * self.input_cells[i]
+                self.input_weights[i][h] += learn * change + correct * self.input_correction[i][h]
+                self.input_correction[i][h] = change
+
+
+        # get global error
+        error = 0.0
+        for o in range(len(label)):
+            error += 0.5 * (label[o] - self.output_cells[o]) ** 2
+        return error
+
+
+    def gw(self): #short for getWeights
+    
+        for h in range(self.hidden_n):
+            for o in range(self.output_n):
+                print("hidden",h,"output",o,"对应的weight是",self.output_weights[h][o])
+                
+        # update input weights
+
+        for i in range(self.input_n):
+            for h in range(self.hidden_n):
+                print("input",i,"hidden",h,"对应的weight是",self.input_weights[i][h])
+
+ 
+
+    def train(self, cases, labels, limit=10000, learn=0.02, correct=0.02): #it's default number for them, but you can always reset them
+
+        learn1 = learn  # give learn a ratio goes with error  part1
+
+        for j in range(limit):
+            #learn = 0.9995 * learn #give learn a fixed discrease ratio
+            error = 0.0
+            for i in range(len(cases)):
+                label = labels[i]
+                case = cases[i]
+                error += self.back_propagate(case, label, learn1, correct)
+
+    
+            X_train,X_test,y_train,y_test=train_test_split(cases,labels)
+            sum = 0
+            if j%500==0:
+                predictions=[]
+                for k in range(len(X_test)):
+                    out=self.predict(X_test[k])#用验证集去测试
+                    predictions.append(np.argmax(out))#返回预测结果
+                    sum += abs((y_test[k][0]-out[0])+(y_test[k][1]-out[1]))
+                accuracy = sum/len(X_test)
+
+                #accuracy=np.mean(np.equal(predictions,y_test))#求平均值
+
+                print('epoch:',j,'Diff:',accuracy)
+                print('learn =', learn1)
+                print('---------------------------------I am a robot-----------------------------------')
+
+            learn1 = accuracy * learn   # give learn a ratio goes with error   part2
+
+            if j%500 == 0:
+                self.gw()
+               
+
+    def test(self):
+        case = ee.ee('1').ds()
+        label = ee.ee('2').ds()
+
+        self.setup(10, 30, 3)
+        self.train(case, label, 5000, 0.55, 0.18)
+        print(self.predict([2,1,0.595,0.553,1,0.431,0.413,0.521,0.861,0.836]))
+        
+        eg.msgbox("Hey, Susu has the solution now!")
+
+
+if __name__ == '__main__':
+    nn = BPNeuralNetwork()
+    nn.test()
