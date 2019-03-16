@@ -1,0 +1,181 @@
+ #automatic execute data into month & day
+
+#automatic execute data into final diff, final direction, trend, kinetic power, kinetic
+#automatic execute data with Final Trend Kinetic
+ 
+ 
+ 
+#need:
+#automatic execute data for the rest as file 1 did
+ 
+import pandas as pd
+import xlrd
+#put every row into a list
+import xlwt
+import xlsxwriter
+ 
+ 
+class ee:
+ 
+ 
+ 
+    def __init__(self,inputFileName):
+        i = 0
+        self.inputFile = "G:/Coding mind/Machine learning/FX/"+inputFileName+".xlsx"
+        self.outputFile = "G:/Coding mind/Machine learning/FX/"+inputFileName+" copy.xlsx"
+        self.month = list()
+        self.day = list()
+        self.finalDiff = list()
+        self.finalDirection = list()
+        self.trend = list()
+        self.kineticPower = list()
+        self.kinetic = list()
+ 
+    
+    def ds(self):
+        #short for dataSource
+ 
+        df = pd.read_excel(self.inputFile)
+        j = list()
+        i = 0
+        while (i < len(df)) :
+            j.append(df.iloc[i].tolist())
+            i = i + 1
+        return j
+ 
+    def read(self, inputRow, inputCols):
+        
+ 
+        df = xlrd.open_workbook(self.inputFile)
+        sheet_names= df.sheet_names()
+      
+        df1 = df.sheet_by_name("Sheet1")
+        rows = df1.row_values(inputRow) # 获取第X+1行内容
+        cols = df1.col_values(inputCols) # 获取第X+1列内容
+        #print(rows)
+        #print(cols)
+        return rows, cols
+ 
+ 
+#Make the whole function work together.
+ 
+ 
+    def finalFX(self,inputRow, inputCols): #for writekinetic
+ 
+        rows, cols = self.read(inputRow, inputCols)
+        rows1, cols1 = self.read(inputRow, inputCols+1)
+        rows2, cols2 = self.read(inputRow, inputCols+4)
+        rows3, cols3 = self.read(inputRow, inputCols+2)
+        rows4, cols4 = self.read(inputRow, inputCols+3)
+        list = [24,25,27,28,33,34]
+ 
+        b = 1
+        i = 0
+        
+        a = 18
+        
+        wbk = xlsxwriter.Workbook(self.outputFile)
+        sheet = wbk.add_worksheet('Sheet1')
+        colList = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T']
+ 
+ 
+        sheet.write(i,0,cols[i]) #第一列的第一行开始写入内容
+        sheet.write(i,1,"MONTH")
+        sheet.write(i,2,"DAY")
+        sheet.write(i,3,cols1[i])  
+        sheet.write(i,4,cols2[i])  
+        sheet.write(i,5,"finalDiff")
+        sheet.write(i,6,"Final")
+        sheet.write(i,7,"Final1")
+        sheet.write(i,8,"Final2")
+        sheet.write(i,9,"Trend")
+        sheet.write(i,10,"Trend1")
+        sheet.write(i,11,"Trend2")
+        sheet.write(i,12,"TOP")  
+        sheet.write(i,13,"Bottom")  
+        sheet.write(i,14,"KineticPower")
+        sheet.write(i,15,"Kinetic")
+        sheet.write(i,16,"Kinetic1")
+        sheet.write(i,17,"Kinetic2")
+ 
+        sheet.write(i,18,"MONTH")
+        sheet.write(i,19,"DAY")
+        sheet.write(i,20,"OPEN")  
+        sheet.write(i,21,"CLOSE")  
+        sheet.write(i,22,"finalDiff")
+        sheet.write(i,23,"Final")
+        sheet.write(i,24,"Final1")
+        sheet.write(i,25,"Final2")
+        sheet.write(i,26,"Trend")
+        sheet.write(i,27,"Trend1")
+        sheet.write(i,28,"Trend2")
+        sheet.write(i,29,"TOP")
+        sheet.write(i,30,"Bottom")  
+        sheet.write(i,31,"KineticPower")
+        sheet.write(i,32,"Kinetic")
+        sheet.write(i,33,"Kinetic1")
+        sheet.write(i,34,"Kinetic2")
+ 
+ 
+        i = 1
+        while i < len(cols):
+            s = str(i+1)
+            s1 = str(i+2)
+ 
+            finalDiff = "=ROUND((E"+s+"-D"+s+")*1000,2)"
+            Final = "=IF(F"+s+">0,IF(F"+s+">1,2,1),IF(F"+s+"<-1,0,1))"
+            trend = "=IF(F"+s+">1,IF(F"+s+"*F"+s1+">0,2,1),IF((F"+s+"-F"+s1+")<-1,0,1))"
+            kineticPower = "=(F"+s+"/ABS(F"+s+"))*ROUND((M"+s+"-N"+s+")*1000,2)"
+            kinetic = "=IF(F"+s+">0,IF(O"+s+">5,2,1),IF(O"+s+"<-5,0,1))"
+            
+            self.finalDiff.append(finalDiff)
+            self.finalDirection.append(Final)
+            self.trend.append(trend)
+ 
+            sheet.write(i,0,cols[i]) #第一列的第一行开始写入内容
+            sheet.write_formula(i,1,"=MONTH(A"+s+")")
+            sheet.write_formula(i,2,"=DAY(A"+s+")")
+            
+            sheet.write(i,3,cols1[i])  #第0行第4列开始写入内容
+            sheet.write(i,4,cols2[i])  #第0行第5列开始写入内容
+            sheet.write_formula(i,5,finalDiff)
+            sheet.write_formula(i,6,Final)
+            sheet.write_formula(i,7,"=if(G"+s+"=0,0,1)")
+            sheet.write_formula(i,8,"=if(G"+s+"=2,1,0)")
+            
+            sheet.write_formula(i,9,trend)
+            sheet.write_formula(i,10,"=if(J"+s+"=0,0,1)")
+            sheet.write_formula(i,11,"=if(J"+s+"=2,1,0)")
+ 
+            sheet.write(i,12,cols3[i])  #第0行第4列开始写入内容
+            sheet.write(i,13,cols4[i])  #第0行第5列开始写入内容
+            sheet.write_formula(i,14,kineticPower)
+            sheet.write_formula(i,15,kinetic)
+            sheet.write_formula(i,16,"=if(P"+s+"=0,0,1)")
+            sheet.write_formula(i,17,"=if(P"+s+"=2,1,0)")
+            i += 1
+ 
+ 
+ 
+        j = 1
+        while b < 18:
+            while j < len(cols):
+                s = str(j+1)
+                s1 = str(j+2)
+                s2 = int(s)
+                if a in list:
+                    sheet.write_formula(j,a,"="+colList[b]+s)
+                else:
+                    normalization = "=("+colList[b]+s+"-MIN("+colList[b]+":"+colList[b]+"))/(MAX("+colList[b]+":"+colList[b]+")-MIN("+colList[b]+":"+colList[b]+"))"
+                    sheet.write_formula(j,a,normalization)
+                j += 1
+            b += 1
+            a += 1
+            j = 1 #remember that we need to reset i to 0 to make the inner while loop go
+ 
+        wbk.close()
+ 
+                
+#if __name__ == '__main__':
+    #obj = ee("4")
+    #obj.finalFX(0,0)
