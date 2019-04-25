@@ -1,0 +1,13 @@
+### weights reader start ###
+#首先，使用tensorflow自带的python打包库读取模型
+model_reader = pywrap_tensorflow.NewCheckpointReader(r"Networksaver/EURDweights.ckpt")
+#然后，使reader变换成类似于dict形式的数据
+var_dict = model_reader.get_variable_to_shape_map()
+#pprint.pprint(var_dict)
+weights = model_reader.get_tensor("Layer/Weights/Variable")
+#pprint.pprint(weights)     #print the whole thing out
+print(weights.shape)
+
+for i in weights:
+    for j in i:
+        print(i,j)
