@@ -30,6 +30,7 @@ input_size=1      #输入层维度
 output_size=1     #输出层维度
 lr=0.0006         #学习率
 train_x,train_y=[],[]   #训练集
+loop = 10000
 
 for i in range(len(normalize_data)-time_step-1):
     x=normalize_data[i:i+time_step]
@@ -75,7 +76,7 @@ def train_lstm():
         sess.run(tf.global_variables_initializer())
         saver.restore(sess, 'stock.model') 
         #重复训练10000次
-        for i in range(10000):
+        for i in range(loop):
             step=0
             start=0
             end=start+batch_size
@@ -119,7 +120,4 @@ def prediction():
         plt.show()
 
 if __name__ == "__main__":
-    if train == 1:
-        train_lstm()
-    else:
-        prediction()
+     train_lstm() if train == 1 else prediction()
