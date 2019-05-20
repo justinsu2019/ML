@@ -1,0 +1,59 @@
+from PIL import Image
+import numpy as np
+
+
+#转化为1/4的网格特征数字统计图
+def get_features(array):
+    #拿到数组的高度和宽度
+    h, w = array.shape
+    data = []
+    for x in range(0, int(w/4)):
+        offset_y = x * 4
+        temp = []
+        for y in range(0,int(h/4)):
+            offset_x = y * 4
+            #统计每个区域的1的值
+            temp.append(sum(sum(array[0+offset_y:4+offset_y,0+offset_x:4+offset_x])))
+        data.append(temp)
+    return np.asarray(data)
+ 
+def loadImage():
+ # 读取图片
+ im = Image.open("2.jpg")
+ 
+ # 显示图片
+ #im.show()
+ # Picture Grayscale
+ im = im.convert("L")
+ # Size Normalization
+ im = im.resize((240,240)) if (im.width>240 and im.height>240) else print(1)
+ #im.show()
+
+ #二值化 for complex pictures, don't do this
+ im = im.point(lambda x:1 if x > 120 else 0)
+ 
+ #将图片转换为数组形式，元素为其像素的亮度值
+ img_array = np.asarray(im)
+ print(img_array)
+ 
+ #将二值化后的数组转化成网格特征统计图
+ img = get_features(img_array)
+
+ #再把二维降为一维
+ features_vector =img.reshape(img.shape[0]*img.shape[1])
+ print(features_vector)
+ 
+ data = im.getdata()
+ #print(data)
+ #print('像素为：',data.getpixel(),"长宽为：",im.width(),"X",im.height())
+ data = np.matrix(data)
+ 
+ #data = np.reshape(data,(1200,1200)) if (im.width>512 and im.height>512) else print(1)
+
+ #[print(1), (data = np.reshape(data,(120,120)))][(im.width>512 and im.height>512)]
+
+ new_im = Image.fromarray(data)
+ # 显示图片
+ #new_im.show()
+ 
+loadImage()
