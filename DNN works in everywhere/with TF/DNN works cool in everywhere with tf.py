@@ -12,9 +12,10 @@ import easygui as eg
 import pprint
 from tensorflow.python import pywrap_tensorflow
 
+
+
 ### pre define start###
 #put in our data -----------------------------------
-
 
 ### controller start ###
 #123 stands for final, highest, lowest
@@ -24,12 +25,9 @@ loadOrNot = 1
 inputFile = 'EURD'
 activation_function = "elu"
 
-if target == 1:
-    label = ee.ee(inputFile,1).ds()
-if target == 2:
-    label = ee.ee(inputFile,2).ds()
-if target == 3:
-    label = ee.ee(inputFile,3).ds()
+# Black magic, optimized 'if' function
+label = ((target == 1 and ee.ee(inputFile,1).ds()) or (target == 2 and ee.ee(inputFile,2).ds()) or (target == 3 and ee.ee(inputFile,3).ds()))
+
 
 data = ee.ee(inputFile,0).ds()[:len(label)]
 test = np.array(ee.ee(inputFile,0).ds()[len(label)])[np.newaxis,:]
@@ -78,12 +76,22 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
             biases = tf.Variable(tf.zeros([1,out_size])+Biases)
         with tf.name_scope("Out"):
             Wx_plus_b = tf.matmul(inputs, Weights) + biases
-
+            
+        '''
+        outputs = ((activation_function is None) and Wx_plus_b or (activation_function(Wx_plus_b)))
+        
+        don't know why black magic is not working
+        '''
+        
         if activation_function is None:
             outputs = Wx_plus_b
         else:
             outputs = activation_function(Wx_plus_b)
+
+
+            
         return outputs
+    
 ### this is how we define a layer end ###
 
 
@@ -99,7 +107,6 @@ with tf.name_scope("inputs"):
 #build layers
 l1 = add_layer(xs,data_size,hidden_size,activation) 
 prediction = add_layer(l1,hidden_size,label_size,None)
-
 
 
 #define loss
@@ -159,11 +166,14 @@ with tf.Session() as sess:
     #restore the system till the end of the last time we ran it
     #restore must be put after nn initial
     #saver.restore(sess, "Networksaver/EurWweights.ckpt")
+
+    (loadOrNot==1 and saver.restore(sess, saver_file) or 0)
+    '''
     if loadOrNot==1:
         saver.restore(sess, saver_file)
     else:
         pass
-    
+    '''
 
     #start training 
     for i in range(loop):
@@ -190,7 +200,6 @@ with tf.Session() as sess:
 
                 #print out the accuracy
 
-
                 prediction_value = sess.run(prediction, feed_dict={xs: data})
 
                 #lines = ax.plot(data, prediction_value,'r-',lw=3)
@@ -207,7 +216,6 @@ with tf.Session() as sess:
 
                 #here is for batch test prediction
                 #don't print, we need to draw or save it to file
-
                 ### test how it works start ###
                 '''
                 list = []
@@ -229,124 +237,9 @@ with tf.Session() as sess:
     #All path here
     #save_path = saver.save(sess,"Networksaver/EurWweights.ckpt")
 
-    if saveOrNot==1:
-        save_path = saver.save(sess,saver_file)
-        print("Save to path:", save_path)
-    else:
-        pass
-    
+    (saveOrNot==1 and print("Save to path:", saver.save(sess,saver_file)) or 0)
 
 ### start nn end ###
-
-
-
-'''
-### weights reader start ###
-#首先，使用tensorflow自带的python打包库读取模型
-model_reader = pywrap_tensorflow.NewCheckpointReader(r"Networksaver/EURDweights.ckpt")
-#然后，使reader变换成类似于dict形式的数据
-var_dict = model_reader.get_variable_to_shape_map()
-#最后，循环打印输出
-
-for key in var_dict:
-    print("variable name: ", key)
-    print(model_reader.get_tensor(key))
-
-    #print out whole picture:
-    #pprint.pprint(model_reader.get_variable_to_shape_map())
-
-
-### high lights is here!!! start ###
-
-
-print(model_reader.get_tensor("Layer/Weights/Variable")[0])
-print(model_reader.get_tensor("Layer/Weights/Variable")[0][0])
-
-
-print("1   ")
-pprint.pprint(model_reader.get_tensor("Layer/Weights/Variable"))
-print("2   ")
-pprint.pprint(model_reader.get_tensor("Layer/Weights/Variable/Adam_1"))
-print("3   ")
-pprint.pprint(model_reader.get_tensor("Layer/Weights/Variable/Adam"))
-
-print("4    ")
-pprint.pprint(model_reader.get_tensor("Layer_1/Weights/Variable"))
-print("5    ")
-pprint.pprint(model_reader.get_tensor("Layer_1/Weights/Variable/Adam"))
-print("6    ")
-pprint.pprint(model_reader.get_tensor("Layer_1/Weights/Variable/Adam_1"))
-
-### high lights is here!!! end ###  
-
-### weights reader end ###
-
-
-import heapq
-x=0
-y=0
-sigmoid = x/(1+y)
-plt.figure(figsize=(16,10))
-plt.xlim([0,40])
-plt.ylim([0,12])
-b = model_reader.get_tensor("Layer/Weights/Variable")
-c = model_reader.get_tensor("Layer_1/Weights/Variable")
-e = 0
-
-# colors
-f = ['antiquewhite','aqua','aquamarine','azure','beige','bisque','black','blanchedalmond','blue','blueviolet',
-     'brown','burlywood','cadetblue','chartreuse','chocolate','coral','cornflowerblue','cornsilk','crimson','cyan',
-     'darkblue','darkcyan','darkgoldenrod','darkgray','darkgreen','darkkhaki','darkmagenta','darkolivegreen',
-     'darkorange','darkorchid','darkred','darksalmon','darkseagreen','darkslateblue','darkslategray','darkturquoise',
-     'darkviolet','deeppink','deepskyblue','dimgray','dodgerblue','firebrick','floralwhite','forestgreen','fuchsia',
-     'gainsboro','ghostwhite','gold','goldenrod','gray','green','greenyellow','honeydew','hotpink','indianred','indigo',
-     'ivory','khaki','lavender','lavenderblush','lawngreen','lemonchiffon','lightblue','lightcoral','lightcyan',
-     'lightgoldenrodyellow','lightgreen','lightgray','lightpink','lightsalmon','lightseagreen','lightskyblue',
-     'lightslategray','lightsteelblue','lightyellow','lime','limegreen','linen','magenta','maroon','mediumaquamarine',
-     'mediumblue','mediumorchid','mediumpurple','mediumseagreen','mediumslateblue','mediumspringgreen','mediumturquoise',
-     'mediumvioletred','midnightblue','mintcream','mistyrose','moccasin','navajowhite','navy','oldlace','olive',
-     'olivedrab','orange','orangered','orchid','palegoldenrod','palegreen','paleturquoise','palevioletred','papayawhip',
-     'peachpuff','peru','pink','plum','powderblue','purple','red','rosybrown','royalblue','saddlebrown','salmon',
-     'sandybrown','seagreen','seashell','sienna','silver','skyblue','slateblue','slategray','snow','springgreen',
-     'steelblue','tan','teal','thistle','tomato','turquoise','violet','wheat','white','whitesmoke','yellow',
-     'yellowgreen'
-     ]
-
-
-input_list = ['start','high', 'low',  'close', '5','40','60','200','13','MACD1','MACD SIGNAL','MACD HISTOGRAM']
-
-
-plt.scatter(16,10,s=100,c='r')
-plt.annotate('Output', xy=(16,10), xytext=(17,11.5),
-        arrowprops=dict(facecolor='black', shrink=0.05),
-        )
-
-#1st input layer 
-for j in range(len(b)):
-    plt.scatter(j*2+5,1,s=50)
-    plt.annotate(input_list[j], xy=(j*2+5,1), xytext=(j*2+4,1-0.8),
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            )
-    e += 0.1
-    
-    for k in range(len(b[0])):
-        max_weight = sorted(b[j])[len(b[j])-1]     
-        plt.scatter(k,5,s=50)
-        plt.plot([k,16],[5,10],c=f[k],lw=b[j][k],alpha=max(b[j][k],0.001)/max_weight)
-        
-
-        plt.plot([j*2+5,k],[1,5],c=f[k],lw=b[j][k],alpha=max(b[j][k],0.001)/max_weight)
-
-        if b[j][k]>sorted(b[j])[len(b[j])-3]:  #only print the top 3 weights
-            plt.text((j*2+5+k)/2,(1+5)/3+e,r'$'+str('%.2f' % (b[j][k]))+'$',color=f[k])   #,fontsize=d[k]*40
-        else:
-            pass
-    
-plt.show()
-
-
-### print out the name and value of variables ###
-'''
 
 
 eg.msgbox("Hey, Susu has the solution now!")
