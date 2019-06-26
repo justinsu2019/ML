@@ -85,6 +85,7 @@ class BPNeuralNetwork:
     def predict(self, inputs):  # also known as forward_propagate()
         
         # activate input layer
+        # print(inputs)
         for i in range(self.input_n - 1):
             self.input_cells[i] = inputs[i]
             
@@ -165,13 +166,14 @@ class BPNeuralNetwork:
         # get global error end
 
 
-    def train(self, cases, labels, limit=10000, learn=0.02, correct=0.1):
+    def train(self, cases, labels, limit=1, learn=0.02, correct=0.1):
         for j in range(limit):
             error = 0.0
             for i in range(cases.shape[0]):
                 label = labels[i]
                 case = cases[i]
                 error += self.back_propagate(case, label, learn, correct)
+            print('Time record ',j,', our error is',error)
         print(error)
         return error
 
@@ -184,9 +186,10 @@ class BPNeuralNetwork:
         #print(case.shape[1], np.unique(label),label.shape)
         
         self.setup(case.shape[1], 2*case.shape[1], 1)
-        self.train(case, label, 10000, 0.02, 0.4)
+        self.train(case, label, 3, 0.02, 0.4)
 
-        print(self.predict([1,0,0,0,0.3,0.22]))
+        print(self.predict([0,0,1,0,1,0,0,0,1,0]))
+        print(self.predict([0,1,1,1,1,0,1,0,1,1]))
     # main function end
 
 # create nn end
