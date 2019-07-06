@@ -6,14 +6,11 @@
 #take out the wrong numbers
 #take only the cols that we can use
 
-
 #need:
 #delete the error ones
 #take only the rows that we can use
 #make it windowszation
 #put in the coding in, like print(self.predict(xx))
-
-
 
 
 import pandas as pd
@@ -27,8 +24,8 @@ class ee:
 
     # all the things we may need to mention later, we just put it here roughly all together.
     def __init__(self,inputFileName,sheetname):
-        self.inputFile = "G:/Coding mind/Machine learning/FX/"+inputFileName+".xlsx"
-        self.outputFile = "G:/Coding mind/Machine learning/FX/"+inputFileName+" copy.xlsx"
+        self.inputFile = "inputFileName+".xlsx" # change here if you want to input your own data.
+        self.outputFile = "inputFileName+" copy.xlsx" # change here if you want to change the save path.
         self.month = list()
         self.day = list()
         self.finalDiff = list()
