@@ -1,6 +1,7 @@
 #Try to compare the difference bewteen every activation function
 #when it comes to RNN, we will need to backward the inputs
 
+
 import tensorflow as tf
 from tensorflow.python import pywrap_tensorflow
 import math
@@ -13,60 +14,50 @@ import pprint
 from tensorflow.python import pywrap_tensorflow
 
 
-
 ### pre define start###
 #put in our data -----------------------------------
 
+
 ### controller start ###
 #123 stands for final, highest, lowest
-target = 1
-saveOrNot = 1
-loadOrNot = 1
+target = 1 # select which sheetname is our targeted label, refer to ee; tips: 1 stand sheet 2
+saveOrNot = 0
+loadOrNot = 0
 inputFile = 'EURD'
 activation_function = "elu"
 
+
 # Black magic, optimized 'if' function
-label = ((target == 1 and ee.ee(inputFile,1).ds()) or (target == 2 and ee.ee(inputFile,2).ds()) or (target == 3 and ee.ee(inputFile,3).ds()))
+label = ((target == 1 and ee.ee(inputFile,1).ds()) or (target == 2 and ee.ee(inputFile,2).ds()) or (target == 3 and ee.ee(inputFile,3).ds())) # if we need to change label, we change here
 
-
-data = ee.ee(inputFile,0).ds()[:len(label)]
-test = np.array(ee.ee(inputFile,0).ds()[len(label)])[np.newaxis,:]
-saver_file = "Networksaver/"+inputFile+"weights.ckpt"
-
-
-### batch test start ###
-'''
-label1 = ee.ee(inputFile,1).ds()
-label = ee.ee(inputFile,1).ds()[:len(label1)-100]
-data = ee.ee(inputFile,0).ds()[:len(label1)-100]
-test = np.array(ee.ee(inputFile,0).ds()[len(label1)-99:len(label1)])
-'''
-### batch test end ###
+data = ee.ee(inputFile,0).ds()[:len(label)] # now, all our data is inputFile's sheet1 data.
+test = np.array(ee.ee(inputFile,0).ds()[len(label)-1])[np.newaxis,:] # test data is the last line normally, of course we can change it if it's not.
+saver_file = "Networksaver/"+inputFile+"weights.ckpt" # save file to this location
 
 
 #when lr more than 0.05, it may goes to be bad
 #best biases is 0.5 now, accuracy is 0.439767
-data_size = 12
-hidden_size = 36
-label_size = 1
+data_size = len(ee.ee(inputFile,0).ds()[0])
+hidden_size = 2*data_size
+label_size = len(ee.ee(inputFile,1).ds()[0])
 loop = 10000
 lr = 0.01
 Biases = 0.05
 
-### controller end ###
+### controller end ###----------------------------------------------------------
 
-#x_data is purely only for visilization good -----------------------------------
+
+#x_data is purely only for visilization good 
 x_data = np.linspace(0.5,1.5,len(label))[:,np.newaxis]
+
 
 #define activation function,
 #till now, elu is the best in performance
-string = str("tf.nn.")+str(activation_function)
-#activation = tf.nn.sigmoid
-activation = exec(string)
+string = str("tf.nn.")+str(activation_function) # make it fexiable to change the activation function
+activation = exec(string) # 2 str won't be recognized by tf, so have to exec it
+
+
 #define how the network looks like
-
-
-
 ### this is how we define a layer start ###
 def add_layer(inputs, in_size, out_size, activation_function=None):
     with tf.name_scope("Layer"):
@@ -77,23 +68,10 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
         with tf.name_scope("Out"):
             Wx_plus_b = tf.matmul(inputs, Weights) + biases
             
-        '''
-        outputs = ((activation_function is None) and Wx_plus_b or (activation_function(Wx_plus_b)))
+        outputs = (activation_function is not None and (activation_function(Wx_plus_b)) or Wx_plus_b) # for tensow, use "is not None instead of is None"
         
-        don't know why black magic is not working
-        '''
-        
-        if activation_function is None:
-            outputs = Wx_plus_b
-        else:
-            outputs = activation_function(Wx_plus_b)
-
-
-            
         return outputs
-    
-### this is how we define a layer end ###
-
+### this is how we define a layer end ###------------------------------------------------------------------
 
 
 
@@ -105,8 +83,8 @@ with tf.name_scope("inputs"):
 
 
 #build layers
-l1 = add_layer(xs,data_size,hidden_size,activation) 
-prediction = add_layer(l1,hidden_size,label_size,None)
+l1 = add_layer(xs,data_size,hidden_size,activation)   # layer 1
+prediction = add_layer(l1,hidden_size,label_size,None)  # output layer
 
 
 #define loss
@@ -124,7 +102,7 @@ with tf.name_scope("Train"):
 
 #define initial, we will need to run it soon before everyelse things carry out
 init = tf.global_variables_initializer()
-### pre define end###
+### pre define end###-------------------------------------------------------------------------------
 
 
 '''
@@ -163,31 +141,21 @@ with tf.Session() as sess:
     sess.run(init)
 
     #store the whole nn 2/3
-    #restore the system till the end of the last time we ran it
-    #restore must be put after nn initial
-    #saver.restore(sess, "Networksaver/EurWweights.ckpt")
+    (loadOrNot==1 and saver.restore(sess, saver_file) or 0)     # better coding for restoration
 
-    (loadOrNot==1 and saver.restore(sess, saver_file) or 0)
-    '''
-    if loadOrNot==1:
-        saver.restore(sess, saver_file)
-    else:
-        pass
-    '''
 
-    #start training 
+    #start training  --------------------------------------------------------------------------------------------------------------------------------------------------------------
     for i in range(loop):
 
         #input data into train function and let it work
         sess.run(train_step, feed_dict={xs: data, ys: label})
 
         #let the nn stop once the accuracy is more than 9.9999%
-
         if sess.run(loss, feed_dict={xs:data, ys: label}) < 0.0002:
-            print("Aim is\n", sess.run(prediction, feed_dict={xs: test})[0][0])
+            print("Aim is {}".format(sess.run(prediction, feed_dict={xs: test})[0][0]))
             break
         else:
-            #print out every 200 times
+            #print out every x times
             if i % 250 == 0:
 
                 #need to remove the previous prediction line before draw new ones
@@ -207,39 +175,22 @@ with tf.Session() as sess:
                 ###lines = ax.plot(x_data,prediction_value,'r-',lw=1)
 
                 #print out, \n is for enter, and [0][0] is to select the very first value in whole matrix
-                print("accuracy is",round(1-sess.run(loss, feed_dict={xs:data, ys: label}),6))
+                print("accuracy is {}".format(round(1-sess.run(loss, feed_dict={xs:data, ys: label}),6)))
 
                 # because "xxx" is str, so if we want '+' instead of ',' (because use , there will be a enter
                 # so we will need to str(the value)
                 #below is for predict only 1 line:
-                print(i,"times, Aim is\n" + str(sess.run(prediction, feed_dict={xs: test})[0][0]).strip())
+                print(i," times, Aim is {}".format(str(sess.run(prediction, feed_dict={xs: test})[0][0]).strip()))
 
                 #here is for batch test prediction
-                #don't print, we need to draw or save it to file
-                ### test how it works start ###
-                '''
-                list = []
-                for i in range(99):
-                    list.append(sess.run(prediction, feed_dict={xs: test})[i][0])
-                ee.ee(inputFile,2).sd(list,i)
-                print('result recorded '+str(i)+" times")
-                '''
-                ### test how it works end ###
-
                 
                 #plt pause to make it more visiable
-                plt.pause(0.1)
+                #plt.pause(0.1)
 
                 
-                
-
     #store the whole nn 3/3
-    #All path here
-    #save_path = saver.save(sess,"Networksaver/EurWweights.ckpt")
-
     (saveOrNot==1 and print("Save to path:", saver.save(sess,saver_file)) or 0)
 
 ### start nn end ###
 
-
-eg.msgbox("Hey, Susu has the solution now!")
+eg.msgbox("Hey, Susu has the solution now!") # remind you once we have all work done!
