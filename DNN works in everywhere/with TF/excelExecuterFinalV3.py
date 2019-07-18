@@ -24,8 +24,8 @@ class ee:
 
     # all the things we may need to mention later, we just put it here roughly all together.
     def __init__(self,inputFileName,sheetname):
-        self.inputFile = "inputFileName+".xlsx" # change here if you want to input your own data.
-        self.outputFile = "inputFileName+" copy.xlsx" # change here if you want to change the save path.
+        self.inputFile = inputFileName+".xlsx" # change here if you want to input your own data.
+        self.outputFile = inputFileName+" copy.xlsx" # change here if you want to change the save path.
         self.month = list()
         self.day = list()
         self.finalDiff = list()
