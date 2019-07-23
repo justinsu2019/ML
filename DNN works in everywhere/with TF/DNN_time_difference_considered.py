@@ -1,3 +1,10 @@
+# what's new
+'''
+1) pack the DNN into a function, even giving so much parameters...lol
+2) consider time difference to inputs
+3) record result into files
+'''
+
 #Try to compare the difference bewteen every activation function
 
 import tensorflow as tf
