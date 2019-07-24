@@ -1,3 +1,9 @@
+* need to update:
+* add caixin PMI in
+* change rates to try
+* checkout how it works with accuracy and things like that.
+
+
 1 get your excel ready with inputs in one sheet and label(result/class) in another
 
 2 change the input file to your file address
