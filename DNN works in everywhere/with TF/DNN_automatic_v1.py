@@ -1,8 +1,8 @@
 
 # what's new
 '''
-1) pack the DNN into a function, even giving so much parameters...lol
-2) consider time difference to inputs
+1) test which parameter works best
+2) test time difference
 3) record result into files
 '''
 
