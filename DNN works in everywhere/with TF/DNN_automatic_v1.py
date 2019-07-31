@@ -1,8 +1,8 @@
 
 # what's new
 '''
-1) test which parameter works best
-2) test time difference
+1) pack the DNN into a function, even giving so much parameters...lol
+2) consider time difference to inputs
 3) record result into files
 '''
 
@@ -39,6 +39,11 @@ def DNN(target, saveOrNot, loadOrNot, inputFile, activation_function,label,data,
 
     inputs_name = pd.read_excel(inputFile+".xlsx" ).columns
     test_data = []
+    label = label[time_stamp:]
+    data = data[:len(label)]
+ 
+
+    
     for i in range(len(label), len(label)+1+time_stamp):
         test = np.array(ee.ee(inputFile,0).ds()[i])[np.newaxis,:] # test data is the last line normally, of course we can change it if it's not.
         test_data.append(test)
@@ -210,18 +215,21 @@ if __name__ == "__main__":
     ### controller start ###
     #123 stands for final, highest, lowest
     target = 1 # select which sheetname is our targeted label, refer to ee; tips: 1 stands for sheet 2
-    saveOrNot = 1
-    loadOrNot = 1
-    saveToFile = 1
-    inputFile = 'Data_reading'
-    activation_function = "elu"
-    lr = 0.005
-    Biases = 0.01
-    i = 0
-    test_parameters = 0
-    test_time = 0
-    label = ((target == 1 and ee.ee(inputFile,1).ds()) or (target == 2 and ee.ee(inputFile,2).ds()) or (target == 3 and ee.ee(inputFile,3).ds())) # if we need to change label, we change here
-    data = ee.ee(inputFile,0).ds()[:len(label)]
+    saveOrNot = 1 # save the result parameters or not
+    loadOrNot = 1 # load pre-saved parameters or not
+    saveToFile = 1 # save the final result to files
+    inputFile = 'Data_reading' # data source 
+    activation_function = "elu" # tf activation function
+    lr = 0.005 # learn rate
+    Biases = 0.01 # created biases
+
+    # to check if time matters, add both 2 parameters below.
+    i = 3 # because we have i as an input required in DNN, so if we don't have to test time, we will need to input i into DNN to, so we declare it here.  Also we can do one-time time test by updating i.
+    test_time = 0 # if we need to check time, 
+
+    test_parameters = 0 # check which learn rate & biases works best
+    label = ((target == 1 and ee.ee(inputFile,1).ds()) or (target == 2 and ee.ee(inputFile,2).ds()) or (target == 3 and ee.ee(inputFile,3).ds())) # if we need to change label, we change in excel sheet 1/2/3 and update it here
+    data = ee.ee(inputFile,0).ds()[:len(label)] # input data source is here.
 
 
     if test_parameters == 1:
@@ -237,6 +245,5 @@ if __name__ == "__main__":
             DNN(target, saveOrNot, loadOrNot, inputFile, activation_function, label, data,lr,Biases,i,saveToFile,)
     else:
         DNN(target, saveOrNot, loadOrNot, inputFile, activation_function, label, data,lr,Biases,i,saveToFile,)
-    
-    eg.msgbox("Hey, Susu has the solution now!")
-    
+
+    eg.msgbox("Hey, Sisi has the solution now!")
